@@ -44,12 +44,14 @@ Subject property:
 Comparable sales:
 ${comparablesText}
 
-Write the draft with these sections:
+Write the draft with these sections, numbered as below:
 1. Property Description
 2. Valuation Methodology (reference the comparable sales approach, since comparables were provided)
 3. Analysis of Comparables
 4. Estimated Value Range (a reasoned range in ZAR, based on the comparables; state assumptions clearly)
 5. Notes for the Valuer (anything missing or that needs to be verified before finalising)
+
+Formatting rules: plain text only. Do not use markdown — no asterisks, no "**bold**", no "#" headers, no markdown bullet points. For lists, use a plain dash "-" or a number followed by a period. This text will be edited and exported as a .txt file, so it must read cleanly as plain text.
 
 Keep it concise and professional. This is a draft for the valuer to edit, not a final report.`;
 }
