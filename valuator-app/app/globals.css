@@ -1,0 +1,151 @@
+:root {
+  --ink-black: #0b0b12;
+  --gold: #bb9d46;
+  --gold-dark: #9c8038;
+  --muted: #5c5a52;
+  --paper: #faf8f3;
+  --border: #e7e1d2;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: var(--paper);
+  color: var(--ink-black);
+}
+
+a {
+  color: var(--gold-dark);
+}
+
+.container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 2rem 1.25rem;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.5rem;
+}
+
+h1, h2 {
+  margin-top: 0;
+}
+
+label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-bottom: 0.25rem;
+  margin-top: 1rem;
+}
+
+input, select, textarea {
+  width: 100%;
+  padding: 0.6rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 1rem;
+  font-family: inherit;
+}
+
+textarea {
+  min-height: 320px;
+  resize: vertical;
+  font-family: ui-monospace, "SF Mono", Consolas, monospace;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+button {
+  background: var(--ink-black);
+  color: #fff;
+  border: none;
+  padding: 0.7rem 1.2rem;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 1.25rem;
+}
+
+button.secondary {
+  background: transparent;
+  color: var(--ink-black);
+  border: 1px solid var(--border);
+}
+
+button.gold {
+  background: var(--gold);
+  color: var(--ink-black);
+  font-weight: 600;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.error {
+  color: #b3261e;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+.row {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.row > * {
+  flex: 1;
+}
+
+.job-list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.9rem 0;
+  border-bottom: 1px solid var(--border);
+  text-decoration: none;
+  color: var(--ink-black);
+}
+
+.job-list-item:last-child {
+  border-bottom: none;
+}
+
+.pill {
+  font-size: 0.75rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  background: var(--paper);
+  border: 1px solid var(--border);
+  color: var(--muted);
+}
+
+.comparable-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr auto;
+  gap: 0.5rem;
+  align-items: end;
+  margin-top: 0.75rem;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.topbar a {
+  font-size: 0.9rem;
+  text-decoration: none;
+}
