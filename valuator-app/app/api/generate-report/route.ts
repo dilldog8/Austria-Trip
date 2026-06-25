@@ -33,17 +33,14 @@ export async function POST(request: NextRequest) {
   let draft: string;
   try {
     draft = await generateValuationDraft({
-      propertyAddress: job.property_address,
-      propertyType: job.property_type,
-      buildingSizeSqm: job.building_size_sqm,
-      landSizeSqm: job.land_size_sqm,
-      yearBuilt: job.year_built,
-      conditionNotes: job.condition_notes,
+      assetCategory: job.asset_category,
+      subjectTitle: job.subject_title,
+      details: job.details ?? {},
       comparables: (comparables ?? []).map((c) => ({
-        address: c.address,
+        description: c.address,
         salePrice: c.sale_price,
         saleDate: c.sale_date,
-        sizeSqm: c.size_sqm,
+        sizeOrMetric: c.size_sqm,
         notes: c.notes,
       })),
     });

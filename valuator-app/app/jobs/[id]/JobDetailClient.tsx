@@ -2,15 +2,13 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { AssetCategory, CATEGORY_LABELS, humanizeKey } from "@/lib/categories";
 
 interface Job {
   id: string;
-  property_address: string;
-  property_type: string;
-  building_size_sqm: number | null;
-  land_size_sqm: number | null;
-  year_built: number | null;
-  condition_notes: string | null;
+  subject_title: string;
+  asset_category: AssetCategory;
+  details: Record<string, string | number | null>;
   status: string;
   draft_report: string | null;
 }
@@ -47,6 +45,7 @@ export default function JobDetailClient({
   const [generating, setGenerating] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [exportingPdf, setExportingPdf] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function handleAddComparable(e: React.FormEvent<HTMLFormElement>) {
@@ -164,24 +163,54 @@ export default function JobDetailClient({
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${job.property_address.replace(/[^a-z0-9]+/gi, "-")}-draft.txt`;
+    a.download = `${job.subject_title.replace(/[^a-z0-9]+/gi, "-")}-draft.txt`;
     a.click();
     URL.revokeObjectURL(url);
+  }
+
+  async function handleExportPdf() {
+    setExportingPdf(true);
+    setError(null);
+
+    try {
+      const res = await fetch("/api/export-pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ jobId: job.id }),
+      });
+
+      if (!res.ok) {
+        const body = await res.json();
+        setError(body.error ?? "PDF export failed");
+        return;
+      }
+
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${job.subject_title.replace(/[^a-z0-9]+/gi, "-")}-draft.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } finally {
+      setExportingPdf(false);
+    }
   }
 
   return (
     <>
       <div className="card">
-        <h2 style={{ fontSize: "1.1rem" }}>Property Details</h2>
+        <h2 style={{ fontSize: "1.1rem" }}>Details</h2>
         <p style={{ color: "var(--muted)", margin: 0 }}>
-          {job.property_type}
-          {job.building_size_sqm ? ` · ${job.building_size_sqm} sqm building` : ""}
-          {job.land_size_sqm ? ` · ${job.land_size_sqm} sqm land` : ""}
-          {job.year_built ? ` · built ${job.year_built}` : ""}
+          {CATEGORY_LABELS[job.asset_category]}
         </p>
-        {job.condition_notes && (
-          <p style={{ marginTop: "0.75rem" }}>{job.condition_notes}</p>
-        )}
+        {Object.entries(job.details)
+          .filter(([, v]) => v !== null && v !== "")
+          .map(([key, value]) => (
+            <p key={key} style={{ marginTop: "0.5rem" }}>
+              <strong>{humanizeKey(key)}:</strong> {value}
+            </p>
+          ))}
       </div>
 
       <div className="card" style={{ marginTop: "1.5rem" }}>
@@ -192,7 +221,7 @@ export default function JobDetailClient({
             <div>{c.address}</div>
             <div>R{c.sale_price.toLocaleString()}</div>
             <div>{c.sale_date ?? "—"}</div>
-            <div>{c.size_sqm ? `${c.size_sqm} sqm` : "—"}</div>
+            <div>{c.size_sqm ? `${c.size_sqm}` : "—"}</div>
             <button
               className="secondary"
               style={{ marginTop: 0 }}
@@ -204,7 +233,7 @@ export default function JobDetailClient({
         ))}
 
         <form onSubmit={handleAddComparable} className="comparable-row">
-          <input name="address" placeholder="Address" required />
+          <input name="address" placeholder="Description" required />
           <input
             name="sale_price"
             type="number"
@@ -213,7 +242,7 @@ export default function JobDetailClient({
             required
           />
           <input name="sale_date" type="date" />
-          <input name="size_sqm" type="number" step="0.1" placeholder="Sqm" />
+          <input name="size_sqm" type="number" step="0.1" placeholder="Size / metric" />
           <button type="submit" style={{ marginTop: 0 }}>
             Add
           </button>
@@ -265,6 +294,9 @@ export default function JobDetailClient({
           </button>
           <button className="secondary" onClick={handleExport} disabled={!draft}>
             Export as .txt
+          </button>
+          <button className="secondary" onClick={handleExportPdf} disabled={!draft || exportingPdf}>
+            {exportingPdf ? "Exporting..." : "Export as PDF"}
           </button>
         </div>
 
