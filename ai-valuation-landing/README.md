@@ -1,6 +1,6 @@
-# Apprais.ai — Landing Page
+# Valuator AI — Landing Page
 
-Static, single-file landing page for **Apprais.ai**, an AI-automation concept for the insurance/asset valuation industry. No build step — just open `index.html` or host it as a static site (GitHub Pages, Netlify, Vercel, etc.).
+Static, single-file landing page for **Valuator AI**, an AI-automation concept for the insurance/asset valuation industry. No build step — just open `index.html` or host it as a static site (GitHub Pages, Netlify, Vercel, etc.).
 
 ## Set up the waitlist (required)
 
