@@ -120,6 +120,31 @@ const styles = StyleSheet.create({
     borderTopColor: BORDER,
     paddingTop: 6,
   },
+  boilerplate: {
+    fontSize: 9,
+    color: MUTED,
+    lineHeight: 1.5,
+  },
+  signOffBlock: {
+    marginTop: 18,
+    borderTopWidth: 1,
+    borderTopColor: BORDER,
+    paddingTop: 12,
+  },
+  signOffRow: {
+    flexDirection: "row",
+    marginBottom: 6,
+  },
+  signOffLabel: {
+    width: 90,
+    color: MUTED,
+  },
+  signOffLine: {
+    flex: 1,
+    borderBottomWidth: 1,
+    borderBottomColor: INK_BLACK,
+    minHeight: 16,
+  },
 });
 
 export interface ComparableForPdf {
@@ -137,6 +162,8 @@ export interface ValuationReportPdfProps {
   comparables: ComparableForPdf[];
   photos: string[];
   generatedDate: string;
+  valuerName: string | null;
+  valuerRole: string | null;
 }
 
 export default function ValuationReportPdf({
@@ -147,6 +174,8 @@ export default function ValuationReportPdf({
   comparables,
   photos,
   generatedDate,
+  valuerName,
+  valuerRole,
 }: ValuationReportPdfProps) {
   const detailEntries = Object.entries(details).filter(
     ([, v]) => v !== null && v !== ""
@@ -187,6 +216,27 @@ export default function ValuationReportPdf({
             </View>
           ))}
         </View>
+
+        <Text style={styles.sectionTitle}>Basis of Value</Text>
+        <Text style={styles.boilerplate}>
+          This valuation is prepared on the basis of Market Value, defined per the
+          International Valuation Standards (IVS) as the estimated amount for which
+          the asset should exchange on the valuation date between a willing buyer and
+          a willing seller in an arm&apos;s-length transaction, after proper
+          marketing, wherein the parties had each acted knowledgeably, prudently, and
+          without compulsion.
+        </Text>
+
+        <Text style={styles.sectionTitle}>Scope of Work</Text>
+        <Text style={styles.boilerplate}>
+          This report has been prepared for the sole use of the instructing client
+          for the stated purpose and may not be relied upon by any other party
+          without the valuer&apos;s prior written consent. The valuer has relied on
+          the information, photographs, and details supplied by the instructing
+          party and referenced comparable sales data, and has not independently
+          verified title, legal description, encumbrances, or regulatory compliance
+          unless expressly stated.
+        </Text>
 
         <Text style={styles.body}>{draftReport}</Text>
 
@@ -245,6 +295,37 @@ export default function ValuationReportPdf({
             </View>
           </>
         )}
+
+        <Text style={styles.sectionTitle}>Assumptions &amp; Limiting Conditions</Text>
+        <Text style={styles.boilerplate}>
+          No allowance has been made for costs of sale, taxation, or other
+          liabilities that may arise on disposal of the subject asset. This
+          valuation represents the valuer&apos;s opinion as at the effective date
+          stated above and may not remain valid at any other date due to market
+          fluctuations. Where comparable sales data is limited, the estimated value
+          range should be treated as provisional pending verification of the items
+          listed under Notes for the Valuer. This document is a draft for internal
+          review unless and until signed off by a qualified valuer below.
+        </Text>
+
+        <View style={styles.signOffBlock}>
+          <View style={styles.signOffRow}>
+            <Text style={styles.signOffLabel}>Prepared by</Text>
+            <Text style={styles.metaValue}>{valuerName ?? "—"}</Text>
+          </View>
+          <View style={styles.signOffRow}>
+            <Text style={styles.signOffLabel}>Role</Text>
+            <Text style={styles.metaValue}>{valuerRole ?? "—"}</Text>
+          </View>
+          <View style={styles.signOffRow}>
+            <Text style={styles.signOffLabel}>Effective date</Text>
+            <Text style={styles.metaValue}>{generatedDate}</Text>
+          </View>
+          <View style={styles.signOffRow}>
+            <Text style={styles.signOffLabel}>Signature</Text>
+            <View style={styles.signOffLine} />
+          </View>
+        </View>
 
         <View style={styles.footer}>
           <Text>Draft for internal review — not a final report.</Text>
