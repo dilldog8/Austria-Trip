@@ -39,6 +39,23 @@ export async function POST(request: NextRequest) {
     .eq("job_id", jobId)
     .order("created_at", { ascending: true });
 
+  const { data: photos } = await supabase
+    .from("job_photos")
+    .select("*")
+    .eq("job_id", jobId)
+    .order("created_at", { ascending: true });
+
+  const photoUrls = (
+    await Promise.all(
+      (photos ?? []).map(async (p) => {
+        const { data } = await supabase.storage
+          .from("job-photos")
+          .createSignedUrl(p.storage_path, 60 * 60);
+        return data?.signedUrl ?? null;
+      })
+    )
+  ).filter((url): url is string => Boolean(url));
+
   const pdfBuffer = await renderToBuffer(
     <ValuationReportPdf
       subjectTitle={job.subject_title}
@@ -51,6 +68,7 @@ export async function POST(request: NextRequest) {
         saleDate: c.sale_date,
         sizeOrMetric: c.size_sqm,
       }))}
+      photos={photoUrls}
       generatedDate={new Date().toLocaleDateString("en-ZA", {
         year: "numeric",
         month: "long",

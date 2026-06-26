@@ -123,6 +123,15 @@ export default function JobDetailClient({
   }
 
   async function handleGenerate() {
+    if (
+      draft &&
+      !window.confirm(
+        "This will replace the current draft text with a newly generated one. Any unsaved edits will be lost. Continue?"
+      )
+    ) {
+      return;
+    }
+
     setGenerating(true);
     setError(null);
 

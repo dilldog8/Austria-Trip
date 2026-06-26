@@ -1,4 +1,4 @@
-import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
+import { Document, Page, Text, View, StyleSheet, Image } from "@react-pdf/renderer";
 import { AssetCategory, CATEGORY_LABELS, humanizeKey } from "@/lib/categories";
 
 const INK_BLACK = "#0b0b12";
@@ -93,6 +93,20 @@ const styles = StyleSheet.create({
   colPrice: { flex: 1 },
   colDate: { flex: 1 },
   colSize: { flex: 1 },
+  photoGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginTop: 6,
+  },
+  photo: {
+    width: 150,
+    height: 112,
+    objectFit: "cover",
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: BORDER,
+  },
   footer: {
     position: "absolute",
     bottom: 24,
@@ -121,6 +135,7 @@ export interface ValuationReportPdfProps {
   details: Record<string, string | number | null>;
   draftReport: string;
   comparables: ComparableForPdf[];
+  photos: string[];
   generatedDate: string;
 }
 
@@ -130,6 +145,7 @@ export default function ValuationReportPdf({
   details,
   draftReport,
   comparables,
+  photos,
   generatedDate,
 }: ValuationReportPdfProps) {
   const detailEntries = Object.entries(details).filter(
@@ -214,6 +230,17 @@ export default function ValuationReportPdf({
                     {c.sizeOrMetric ?? "—"}
                   </Text>
                 </View>
+              ))}
+            </View>
+          </>
+        )}
+
+        {photos.length > 0 && (
+          <>
+            <Text style={styles.sectionTitle}>Photos</Text>
+            <View style={styles.photoGrid}>
+              {photos.map((src, i) => (
+                <Image key={i} src={src} style={styles.photo} />
               ))}
             </View>
           </>
