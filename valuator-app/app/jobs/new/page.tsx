@@ -4,10 +4,18 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import {
+  ASSET_CATEGORIES,
+  CATEGORY_LABELS,
+  CATEGORY_FIELDS,
+  SUBJECT_TITLE_LABELS,
+  AssetCategory,
+} from "@/lib/categories";
 
 export default function NewJobPage() {
   const router = useRouter();
   const supabase = createClient();
+  const [category, setCategory] = useState<AssetCategory>("property");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -19,16 +27,26 @@ export default function NewJobPage() {
     const formData = new FormData(e.currentTarget);
     const { data: userData } = await supabase.auth.getUser();
 
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("org_id")
+      .eq("id", userData.user?.id)
+      .single();
+
+    const details: Record<string, string | number | null> = {};
+    for (const field of CATEGORY_FIELDS[category]) {
+      const value = formData.get(field.name);
+      details[field.name] = value ? (value as string) : null;
+    }
+
     const { data, error } = await supabase
       .from("valuation_jobs")
       .insert({
         created_by: userData.user?.id,
-        property_address: formData.get("property_address"),
-        property_type: formData.get("property_type"),
-        building_size_sqm: formData.get("building_size_sqm") || null,
-        land_size_sqm: formData.get("land_size_sqm") || null,
-        year_built: formData.get("year_built") || null,
-        condition_notes: formData.get("condition_notes") || null,
+        org_id: profile?.org_id,
+        asset_category: category,
+        subject_title: formData.get("subject_title"),
+        details,
       })
       .select("id")
       .single();
@@ -51,48 +69,54 @@ export default function NewJobPage() {
       </div>
 
       <form className="card" onSubmit={handleSubmit}>
-        <label htmlFor="property_address">Property address</label>
-        <input id="property_address" name="property_address" required />
-
-        <label htmlFor="property_type">Property type</label>
-        <select id="property_type" name="property_type" required defaultValue="">
-          <option value="" disabled>
-            Select type
-          </option>
-          <option value="Residential">Residential</option>
-          <option value="Commercial Office">Commercial Office</option>
-          <option value="Retail">Retail</option>
-          <option value="Industrial / Warehouse">Industrial / Warehouse</option>
-          <option value="Agricultural">Agricultural</option>
-          <option value="Vacant Land">Vacant Land</option>
+        <label htmlFor="asset_category">Asset category</label>
+        <select
+          id="asset_category"
+          value={category}
+          onChange={(e) => setCategory(e.target.value as AssetCategory)}
+        >
+          {ASSET_CATEGORIES.map((c) => (
+            <option key={c} value={c}>
+              {CATEGORY_LABELS[c]}
+            </option>
+          ))}
         </select>
 
-        <div className="row">
-          <div>
-            <label htmlFor="building_size_sqm">Building size (sqm)</label>
-            <input
-              id="building_size_sqm"
-              name="building_size_sqm"
-              type="number"
-              step="0.1"
-            />
-          </div>
-          <div>
-            <label htmlFor="land_size_sqm">Land size (sqm)</label>
-            <input id="land_size_sqm" name="land_size_sqm" type="number" step="0.1" />
-          </div>
-        </div>
+        <label htmlFor="subject_title">{SUBJECT_TITLE_LABELS[category]}</label>
+        <input id="subject_title" name="subject_title" required />
 
-        <label htmlFor="year_built">Year built</label>
-        <input id="year_built" name="year_built" type="number" />
-
-        <label htmlFor="condition_notes">Condition notes</label>
-        <textarea
-          id="condition_notes"
-          name="condition_notes"
-          style={{ minHeight: 120 }}
-          placeholder="General condition, recent renovations, defects, etc."
-        />
+        {CATEGORY_FIELDS[category].map((field) => (
+          <div key={field.name}>
+            <label htmlFor={field.name}>{field.label}</label>
+            {field.type === "textarea" ? (
+              <textarea
+                id={field.name}
+                name={field.name}
+                style={{ minHeight: 100 }}
+                required={field.required}
+              />
+            ) : field.type === "select" ? (
+              <select id={field.name} name={field.name} required={field.required} defaultValue="">
+                <option value="" disabled>
+                  Select
+                </option>
+                {field.options?.map((opt) => (
+                  <option key={opt} value={opt}>
+                    {opt}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <input
+                id={field.name}
+                name={field.name}
+                type={field.type}
+                step={field.type === "number" ? "0.1" : undefined}
+                required={field.required}
+              />
+            )}
+          </div>
+        ))}
 
         {error && <p className="error">{error}</p>}
         <button className="gold" type="submit" disabled={loading}>

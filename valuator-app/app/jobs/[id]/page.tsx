@@ -44,7 +44,7 @@ export default async function JobDetailPage({
   return (
     <div className="container">
       <div className="topbar">
-        <h1 style={{ margin: 0, fontSize: "1.4rem" }}>{job.property_address}</h1>
+        <h1 style={{ margin: 0, fontSize: "1.4rem" }}>{job.subject_title}</h1>
         <Link href="/dashboard">Back to jobs</Link>
       </div>
 
