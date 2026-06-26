@@ -64,13 +64,21 @@ export default function JobDetailClient({
     const form = e.currentTarget;
     const formData = new FormData(form);
 
+    const day = formData.get("sale_day");
+    const month = formData.get("sale_month");
+    const year = formData.get("sale_year");
+    const sale_date =
+      day && month && year
+        ? `${String(year).padStart(4, "0")}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`
+        : null;
+
     const { data, error } = await supabase
       .from("comparable_sales")
       .insert({
         job_id: job.id,
         address: formData.get("address"),
         sale_price: Number(formData.get("sale_price")),
-        sale_date: formData.get("sale_date") || null,
+        sale_date,
         size_sqm: formData.get("size_sqm") || null,
         notes: formData.get("notes") || null,
       })
@@ -399,7 +407,32 @@ export default function JobDetailClient({
             placeholder="Sale price"
             required
           />
-          <input name="sale_date" type="date" />
+          <div style={{ display: "flex", gap: "0.25rem" }}>
+            <input
+              name="sale_day"
+              type="number"
+              inputMode="numeric"
+              min={1}
+              max={31}
+              placeholder="DD"
+            />
+            <input
+              name="sale_month"
+              type="number"
+              inputMode="numeric"
+              min={1}
+              max={12}
+              placeholder="MM"
+            />
+            <input
+              name="sale_year"
+              type="number"
+              inputMode="numeric"
+              min={1900}
+              max={2100}
+              placeholder="YYYY"
+            />
+          </div>
           <input name="size_sqm" type="number" step="0.1" placeholder="Size / metric" />
           <button type="submit" style={{ marginTop: 0 }}>
             Add
