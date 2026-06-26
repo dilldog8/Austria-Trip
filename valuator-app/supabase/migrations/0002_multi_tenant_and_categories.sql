@@ -42,7 +42,7 @@ create policy "Members can view profiles in their org" on profiles
 -- is already using the app today) an admin of it. Anyone invited after this
 -- point is added as a 'valuer' via the admin UI and inherits this org.
 insert into organizations (name)
-select 'The Valuator Group'
+select 'AVS'
 where not exists (select 1 from organizations);
 
 insert into profiles (id, org_id, role)

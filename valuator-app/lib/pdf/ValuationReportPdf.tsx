@@ -141,9 +141,9 @@ export default function ValuationReportPdf({
       <Page size="A4" style={styles.page}>
         <View style={styles.header}>
           <View>
-            <Text style={styles.letterhead}>The Valuator Group</Text>
+            <Text style={styles.letterhead}>AVS</Text>
             <Text style={styles.letterheadSub}>
-              Independent Asset Valuation Services
+              Asset Valuation Specialists
             </Text>
           </View>
           <Text style={styles.docTitle}>Draft Valuation Report</Text>
