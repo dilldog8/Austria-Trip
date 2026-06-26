@@ -64,13 +64,8 @@ export default function JobDetailClient({
     const form = e.currentTarget;
     const formData = new FormData(form);
 
-    const day = formData.get("sale_day");
-    const month = formData.get("sale_month");
     const year = formData.get("sale_year");
-    const sale_date =
-      day && month && year
-        ? `${String(year).padStart(4, "0")}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`
-        : null;
+    const sale_date = year ? `${String(year).padStart(4, "0")}-01-01` : null;
 
     const { data, error } = await supabase
       .from("comparable_sales")
@@ -386,7 +381,7 @@ export default function JobDetailClient({
           <div key={c.id} className="comparable-row">
             <div>{c.address}</div>
             <div>R{c.sale_price.toLocaleString()}</div>
-            <div>{c.sale_date ?? "—"}</div>
+            <div>{c.sale_date ? c.sale_date.slice(0, 4) : "—"}</div>
             <div>{c.size_sqm ? `${c.size_sqm}` : "—"}</div>
             <button
               className="secondary"
@@ -407,32 +402,14 @@ export default function JobDetailClient({
             placeholder="Sale price"
             required
           />
-          <div style={{ display: "flex", gap: "0.25rem" }}>
-            <input
-              name="sale_day"
-              type="number"
-              inputMode="numeric"
-              min={1}
-              max={31}
-              placeholder="DD"
-            />
-            <input
-              name="sale_month"
-              type="number"
-              inputMode="numeric"
-              min={1}
-              max={12}
-              placeholder="MM"
-            />
-            <input
-              name="sale_year"
-              type="number"
-              inputMode="numeric"
-              min={1900}
-              max={2100}
-              placeholder="YYYY"
-            />
-          </div>
+          <input
+            name="sale_year"
+            type="number"
+            inputMode="numeric"
+            min={1900}
+            max={2100}
+            placeholder="Sale year"
+          />
           <input name="size_sqm" type="number" step="0.1" placeholder="Size / metric" />
           <button type="submit" style={{ marginTop: 0 }}>
             Add

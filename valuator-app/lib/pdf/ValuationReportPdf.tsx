@@ -252,7 +252,7 @@ export default function ValuationReportPdf({
                   Sale Price
                 </Text>
                 <Text style={[styles.tableHeaderCell, styles.colDate]}>
-                  Date
+                  Year
                 </Text>
                 <Text style={[styles.tableHeaderCell, styles.colSize]}>
                   Size / Metric
@@ -274,7 +274,7 @@ export default function ValuationReportPdf({
                     R{c.salePrice.toLocaleString()}
                   </Text>
                   <Text style={[styles.tableCell, styles.colDate]}>
-                    {c.saleDate ?? "—"}
+                    {c.saleDate ? c.saleDate.slice(0, 4) : "—"}
                   </Text>
                   <Text style={[styles.tableCell, styles.colSize]}>
                     {c.sizeOrMetric ?? "—"}

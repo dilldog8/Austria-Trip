@@ -43,6 +43,7 @@ export async function POST(request: NextRequest) {
         sizeOrMetric: c.size_sqm,
         notes: c.notes,
       })),
+      asOfDate: new Date().toISOString().slice(0, 10),
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : "AI generation failed";
