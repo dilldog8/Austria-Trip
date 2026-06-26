@@ -16,6 +16,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "jobId is required" }, { status: 400 });
   }
 
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("full_name, role")
+    .eq("id", userData.user.id)
+    .single();
+
   const { data: job, error: jobError } = await supabase
     .from("valuation_jobs")
     .select("*")
@@ -74,6 +80,8 @@ export async function POST(request: NextRequest) {
         month: "long",
         day: "numeric",
       })}
+      valuerName={profile?.full_name ?? userData.user.email ?? null}
+      valuerRole={profile?.role === "admin" ? "Admin Valuer" : "Valuer"}
     />
   );
 
