@@ -1,8 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { AssetCategory, CATEGORY_LABELS, humanizeKey } from "@/lib/categories";
+import {
+  AssetCategory,
+  CATEGORY_LABELS,
+  CATEGORY_FIELDS,
+  SUBJECT_TITLE_LABELS,
+  humanizeKey,
+} from "@/lib/categories";
 
 interface Job {
   id: string;
@@ -38,6 +45,7 @@ export default function JobDetailClient({
   initialPhotos: Photo[];
 }) {
   const supabase = createClient();
+  const router = useRouter();
 
   const [comparables, setComparables] = useState(initialComparables);
   const [photos, setPhotos] = useState(initialPhotos);
@@ -46,6 +54,9 @@ export default function JobDetailClient({
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [exportingPdf, setExportingPdf] = useState(false);
+  const [deletingJob, setDeletingJob] = useState(false);
+  const [editingDetails, setEditingDetails] = useState(false);
+  const [savingDetails, setSavingDetails] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function handleAddComparable(e: React.FormEvent<HTMLFormElement>) {
@@ -122,7 +133,88 @@ export default function JobDetailClient({
     e.target.value = "";
   }
 
+  async function handleDeletePhoto(photo: Photo) {
+    if (!window.confirm("Remove this photo? This cannot be undone.")) return;
+
+    setError(null);
+    await supabase.storage.from("job-photos").remove([photo.storage_path]);
+    const { error } = await supabase.from("job_photos").delete().eq("id", photo.id);
+
+    if (error) {
+      setError(error.message);
+      return;
+    }
+
+    setPhotos((prev) => prev.filter((p) => p.id !== photo.id));
+  }
+
+  async function handleSaveDetails(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setSavingDetails(true);
+    setError(null);
+
+    const formData = new FormData(e.currentTarget);
+    const details: Record<string, string | number | null> = {};
+    for (const field of CATEGORY_FIELDS[job.asset_category]) {
+      const value = formData.get(field.name);
+      details[field.name] = value ? (value as string) : null;
+    }
+
+    const { error } = await supabase
+      .from("valuation_jobs")
+      .update({ subject_title: formData.get("subject_title"), details })
+      .eq("id", job.id);
+
+    setSavingDetails(false);
+
+    if (error) {
+      setError(error.message);
+      return;
+    }
+
+    setEditingDetails(false);
+    router.refresh();
+  }
+
+  async function handleDeleteJob() {
+    if (
+      !window.confirm(
+        `Delete "${job.subject_title}" permanently? This removes the job, its comparables, and its photos. This cannot be undone.`
+      )
+    ) {
+      return;
+    }
+
+    setDeletingJob(true);
+    setError(null);
+
+    if (photos.length > 0) {
+      await supabase.storage
+        .from("job-photos")
+        .remove(photos.map((p) => p.storage_path));
+    }
+
+    const { error } = await supabase.from("valuation_jobs").delete().eq("id", job.id);
+
+    if (error) {
+      setDeletingJob(false);
+      setError(error.message);
+      return;
+    }
+
+    router.push("/dashboard");
+  }
+
   async function handleGenerate() {
+    if (
+      draft &&
+      !window.confirm(
+        "This will replace the current draft text with a newly generated one. Any unsaved edits will be lost. Continue?"
+      )
+    ) {
+      return;
+    }
+
     setGenerating(true);
     setError(null);
 
@@ -200,17 +292,83 @@ export default function JobDetailClient({
   return (
     <>
       <div className="card">
-        <h2 style={{ fontSize: "1.1rem" }}>Details</h2>
-        <p style={{ color: "var(--muted)", margin: 0 }}>
-          {CATEGORY_LABELS[job.asset_category]}
-        </p>
-        {Object.entries(job.details)
-          .filter(([, v]) => v !== null && v !== "")
-          .map(([key, value]) => (
-            <p key={key} style={{ marginTop: "0.5rem" }}>
-              <strong>{humanizeKey(key)}:</strong> {value}
+        <div className="topbar" style={{ marginBottom: editingDetails ? "0.5rem" : 0 }}>
+          <h2 style={{ fontSize: "1.1rem", margin: 0 }}>Details</h2>
+          <button
+            className="secondary"
+            style={{ marginTop: 0 }}
+            onClick={() => setEditingDetails((v) => !v)}
+          >
+            {editingDetails ? "Cancel" : "Edit"}
+          </button>
+        </div>
+
+        {editingDetails ? (
+          <form onSubmit={handleSaveDetails}>
+            <label htmlFor="subject_title">{SUBJECT_TITLE_LABELS[job.asset_category]}</label>
+            <input
+              id="subject_title"
+              name="subject_title"
+              defaultValue={job.subject_title}
+              required
+            />
+            {CATEGORY_FIELDS[job.asset_category].map((field) => (
+              <div key={field.name}>
+                <label htmlFor={field.name}>{field.label}</label>
+                {field.type === "textarea" ? (
+                  <textarea
+                    id={field.name}
+                    name={field.name}
+                    style={{ minHeight: 100 }}
+                    defaultValue={job.details[field.name] ?? ""}
+                    required={field.required}
+                  />
+                ) : field.type === "select" ? (
+                  <select
+                    id={field.name}
+                    name={field.name}
+                    defaultValue={job.details[field.name] ?? ""}
+                    required={field.required}
+                  >
+                    <option value="" disabled>
+                      Select
+                    </option>
+                    {field.options?.map((opt) => (
+                      <option key={opt} value={opt}>
+                        {opt}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    id={field.name}
+                    name={field.name}
+                    type={field.type}
+                    step={field.type === "number" ? "0.1" : undefined}
+                    defaultValue={job.details[field.name] ?? ""}
+                    required={field.required}
+                  />
+                )}
+              </div>
+            ))}
+            <button className="gold" type="submit" disabled={savingDetails}>
+              {savingDetails ? "Saving..." : "Save Details"}
+            </button>
+          </form>
+        ) : (
+          <>
+            <p style={{ color: "var(--muted)", margin: 0 }}>
+              {CATEGORY_LABELS[job.asset_category]}
             </p>
-          ))}
+            {Object.entries(job.details)
+              .filter(([, v]) => v !== null && v !== "")
+              .map(([key, value]) => (
+                <p key={key} style={{ marginTop: "0.5rem" }}>
+                  <strong>{humanizeKey(key)}:</strong> {value}
+                </p>
+              ))}
+          </>
+        )}
       </div>
 
       <div className="card" style={{ marginTop: "1.5rem" }}>
@@ -254,12 +412,29 @@ export default function JobDetailClient({
         <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
           {photos.map((p) =>
             p.url ? (
-              <img
-                key={p.id}
-                src={p.url}
-                alt=""
-                style={{ width: 120, height: 90, objectFit: "cover", borderRadius: 6 }}
-              />
+              <div key={p.id} style={{ position: "relative" }}>
+                <img
+                  src={p.url}
+                  alt=""
+                  style={{ width: 120, height: 90, objectFit: "cover", borderRadius: 6, display: "block" }}
+                />
+                <button
+                  type="button"
+                  className="secondary"
+                  onClick={() => handleDeletePhoto(p)}
+                  style={{
+                    position: "absolute",
+                    top: 4,
+                    right: 4,
+                    marginTop: 0,
+                    padding: "0.15rem 0.5rem",
+                    fontSize: "0.7rem",
+                    background: "rgba(255,255,255,0.92)",
+                  }}
+                >
+                  Remove
+                </button>
+              </div>
             ) : null
           )}
         </div>
@@ -301,6 +476,12 @@ export default function JobDetailClient({
         </div>
 
         {error && <p className="error">{error}</p>}
+      </div>
+
+      <div style={{ marginTop: "1.5rem", textAlign: "right" }}>
+        <button className="danger" onClick={handleDeleteJob} disabled={deletingJob}>
+          {deletingJob ? "Deleting..." : "Delete Job"}
+        </button>
       </div>
     </>
   );

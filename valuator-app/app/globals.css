@@ -154,6 +154,17 @@ button:disabled {
   cursor: not-allowed;
 }
 
+button.danger {
+  background: transparent;
+  color: #b3261e;
+  border: 1px solid rgba(179, 38, 30, 0.35);
+}
+
+button.danger:hover:not(:disabled) {
+  background: rgba(179, 38, 30, 0.08);
+  box-shadow: none;
+}
+
 .error {
   color: #b3261e;
   font-size: 0.9rem;
@@ -243,4 +254,18 @@ button:disabled {
 .topbar a {
   font-size: 0.9rem;
   text-decoration: none;
+}
+
+@media (max-width: 640px) {
+  .comparable-row {
+    grid-template-columns: 1fr;
+    gap: 0.4rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .topbar {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
 }
