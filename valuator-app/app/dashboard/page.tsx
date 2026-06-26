@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { CATEGORY_LABELS, AssetCategory } from "@/lib/categories";
+import { CATEGORY_LABELS, CATEGORY_COLORS, AssetCategory } from "@/lib/categories";
+import Brand from "@/app/components/Brand";
 import SignOutButton from "./SignOutButton";
 
 export default async function DashboardPage() {
@@ -23,7 +24,10 @@ export default async function DashboardPage() {
   return (
     <div className="container">
       <div className="topbar">
-        <h1 style={{ margin: 0, fontSize: "1.4rem" }}>Valuation Jobs</h1>
+        <div>
+          <Brand />
+          <h1 style={{ margin: "0.5rem 0 0", fontSize: "1.3rem" }}>Valuation Jobs</h1>
+        </div>
         <div style={{ display: "flex", gap: "0.75rem" }}>
           {myProfile?.role === "admin" && (
             <Link href="/admin/users">
@@ -55,12 +59,22 @@ export default async function DashboardPage() {
               className="job-list-item"
             >
               <div>
-                <div>{job.subject_title}</div>
-                <div style={{ fontSize: "0.8rem", color: "var(--muted)" }}>
-                  {CATEGORY_LABELS[job.asset_category as AssetCategory]}
+                <div style={{ fontWeight: 500 }}>{job.subject_title}</div>
+                <div className="job-meta">
+                  <span
+                    className="category-dot"
+                    style={{
+                      background: CATEGORY_COLORS[job.asset_category as AssetCategory],
+                    }}
+                  />
+                  <span style={{ fontSize: "0.8rem", color: "var(--muted)" }}>
+                    {CATEGORY_LABELS[job.asset_category as AssetCategory]}
+                  </span>
                 </div>
               </div>
-              <span className="pill">{job.status}</span>
+              <span className={`pill ${job.status === "drafted" ? "pill-gold" : ""}`}>
+                {job.status}
+              </span>
             </Link>
           ))
         )}

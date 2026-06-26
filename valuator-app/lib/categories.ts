@@ -14,6 +14,13 @@ export const CATEGORY_LABELS: Record<AssetCategory, string> = {
   art_collectibles: "Art & Collectibles",
 };
 
+export const CATEGORY_COLORS: Record<AssetCategory, string> = {
+  property: "#5b7c99",
+  plant_machinery: "#a35d3d",
+  motor_vehicle: "#3d7a5c",
+  art_collectibles: "#8a4f8e",
+};
+
 export function humanizeKey(key: string): string {
   return key
     .replace(/_/g, " ")
