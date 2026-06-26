@@ -1,6 +1,6 @@
-# Valuator AI — The Valuator Group
+# Valuator AI — AVS (Asset Valuation Specialists)
 
-Internal tool for The Valuator Group's valuers. Log in, create a valuation job in any of four asset categories (Property, Plant & Machinery, Motor Vehicles, Art & Collectibles), add comparable sales and photos, then generate an AI-assisted first draft of the report — edit it, save it, and export it as a branded PDF or plain text.
+Internal tool for AVS's valuers. Log in, create a valuation job in any of four asset categories (Property, Plant & Machinery, Motor Vehicles, Art & Collectibles), add comparable sales and photos, then generate an AI-assisted first draft of the report — edit it, save it, and export it as a branded PDF or plain text.
 
 Every valuer at the company logs in under one shared organization. Any valuer can see and work on any job in the org (a collaborative model, not a personal-folder model). Admins can invite new valuers from inside the app — no one else can sign up.
 
@@ -26,7 +26,7 @@ If this is a **brand-new Supabase project** (skip to step 2 if you already have 
 
 If you are **upgrading an existing project** from the Property-only MVP:
 
-1. **SQL Editor** → run `supabase/migrations/0002_multi_tenant_and_categories.sql`. It's written to run safely on top of existing data: it creates one "The Valuator Group" organization, makes every existing logged-in user an admin of it, and migrates the existing test job into the new category/details format automatically. Nothing to fill in by hand.
+1. **SQL Editor** → run `supabase/migrations/0002_multi_tenant_and_categories.sql`. It's written to run safely on top of existing data: it creates one "AVS" organization, makes every existing logged-in user an admin of it, and migrates the existing test job into the new category/details format automatically. Nothing to fill in by hand.
 2. Grab the **service_role** key from **Project Settings → API** (you didn't need this one before).
 
 ### Bootstrap: make yourself an admin
