@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import Brand from "@/app/components/Brand";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -35,9 +36,13 @@ export default function LoginPage() {
 
   return (
     <div className="container" style={{ maxWidth: 400, paddingTop: "4rem" }}>
-      <h1>Valuator AI</h1>
-      <p style={{ color: "var(--muted)" }}>Internal drafting tool — sign in</p>
-      <form className="card" onSubmit={handleSubmit}>
+      <div style={{ marginBottom: "0.5rem" }}>
+        <Brand />
+      </div>
+      <p style={{ color: "var(--muted)", marginTop: "0.5rem" }}>
+        Valuator AI — internal drafting tool, sign in
+      </p>
+      <form className="card" onSubmit={handleSubmit} style={{ marginTop: "1.5rem" }}>
         <label htmlFor="email">Email</label>
         <input
           id="email"
